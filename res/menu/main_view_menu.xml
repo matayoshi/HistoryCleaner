@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<menu
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	>
+	<item
+		android:id="@+id/main_menu_all_check"
+		android:title="@string/all_check_string"
+		android:icon="@android:drawable/checkbox_on_background"
+		/>
+	<item
+		android:id="@+id/main_menu_all_uncheck"
+		android:title="@string/all_uncheck_string"
+		android:icon="@android:drawable/checkbox_off_background"
+		/>
+</menu>
