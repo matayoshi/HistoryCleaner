@@ -27,8 +27,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package nmtysh.android.app.historycleaner;
 
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -44,6 +47,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
@@ -57,6 +61,7 @@ import android.widget.Toast;
 public class HistoryCleanerActivity extends Activity {
 	private CustomCursorAdapter adapter = null;
 	ListView listView = null;
+	Cursor cursor = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -66,6 +71,7 @@ public class HistoryCleanerActivity extends Activity {
 		// リストのクリックイベントを捕捉する
 		listView = (ListView) findViewById(android.R.id.list);
 		listView.setOnItemClickListener(itemClickListener);
+		listView.setOnItemLongClickListener(itemLongClickListener);
 
 		// データベースとリストビューを関連付ける
 		String[] from = new String[] { Browser.BookmarkColumns.TITLE,
@@ -86,29 +92,7 @@ public class HistoryCleanerActivity extends Activity {
 	protected void onStart() {
 		super.onStart();
 
-		// 古いカーソルがある場合は明示的に閉じる。
-		Cursor old = adapter.getCursor();
-		if (old != null) {
-			stopManagingCursor(old);
-			old.close();
-			old = null;
-		}
-
-		// 取得するDBのカラム指定
-		String[] projection = new String[] { Browser.BookmarkColumns.TITLE,
-				Browser.BookmarkColumns.URL, Browser.BookmarkColumns.VISITS, };
-		// ContentProviderから履歴情報を取得(ブックマーク登録されたものを除外する)
-		Cursor c = getContentResolver().query(Browser.BOOKMARKS_URI, // URI
-				projection, // カラム
-				Browser.BookmarkColumns.BOOKMARK + " = ?", // selection
-				new String[] { "0" }, // selectionArgs
-				Browser.BookmarkColumns.DATE // sortOrder
-				);
-		// listView.invalidateViews();
-		adapter.changeCursor(c);
-		// adapter.notifyDataSetChanged();
-		// ベースクラスにCursorのライフサイクルを管理させる
-		startManagingCursor(c);
+		getHistory();
 	}
 
 	/**
@@ -140,7 +124,7 @@ public class HistoryCleanerActivity extends Activity {
 		return true;
 	}
 
-	// リストのイベントリスナー
+	// リストアイテムのクリックイベントリスナー
 	OnItemClickListener itemClickListener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -154,16 +138,15 @@ public class HistoryCleanerActivity extends Activity {
 	OnClickListener clickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			Cursor c = adapter.getCursor();
-			int tindex = c.getColumnIndex(Browser.BookmarkColumns.TITLE);
+			int tindex = cursor.getColumnIndex(Browser.BookmarkColumns.TITLE);
 
 			// チェック済みリストの取得
 			SparseBooleanArray array = listView.getCheckedItemPositions();
 			List<String> list = new LinkedList<String>();
 			for (int i = 0; i < array.size(); i++) {
 				if (array.valueAt(i)) { // チェックされていないものも混じっている
-					c.moveToPosition(array.keyAt(i));
-					list.add(c.getString(tindex));
+					cursor.moveToPosition(array.keyAt(i));
+					list.add(cursor.getString(tindex));
 				}
 			}
 			// チェック済みのものが無かった。
@@ -196,6 +179,68 @@ public class HistoryCleanerActivity extends Activity {
 		}
 	};
 
+	// リストアイテムのロングクリックイベントのリスナー
+	OnItemLongClickListener itemLongClickListener = new OnItemLongClickListener() {
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int position, long id) {
+			// 現在の選択状態を保持する
+			SparseBooleanArray array = listView.getCheckedItemPositions();
+			Set<Integer> set = new LinkedHashSet<Integer>();
+			for (int i = 0; i < array.size(); i++) {
+				if (array.valueAt(i)) {
+					int key = array.keyAt(i);
+					key = key > position ? key - 1 : key;
+					set.add(key);
+				}
+			}
+
+			// 選択した履歴を削除する
+			int uindex = cursor.getColumnIndex(Browser.BookmarkColumns.URL);
+			cursor.moveToPosition(position);
+			Browser.deleteFromHistory(getContentResolver(),
+					cursor.getString(uindex));
+
+			allUnCheck();
+			// 再取得
+			getHistory();
+
+			// リストの選択状態を反映させる
+			// TODO: 元の順序と再取得後の順序が異なっている可能性も考慮する
+			for (Iterator<Integer> it = set.iterator(); it.hasNext();) {
+				int index = it.next();
+				listView.setItemChecked(index, true);
+			}
+			return true;
+		}
+	};
+
+	/**
+	 * 履歴を取得します。
+	 */
+	private void getHistory() {
+		// 古いカーソルがある場合は明示的に閉じる。
+		if (cursor != null) {
+			stopManagingCursor(cursor);
+			cursor.close();
+			cursor = null;
+		}
+
+		// 取得するDBのカラム指定
+		String[] projection = new String[] { Browser.BookmarkColumns.TITLE,
+				Browser.BookmarkColumns.URL, Browser.BookmarkColumns.VISITS, };
+		// ContentProviderから履歴情報を取得(ブックマーク登録されたものを除外する)
+		cursor = getContentResolver().query(Browser.BOOKMARKS_URI, // URI
+				projection, // カラム
+				Browser.BookmarkColumns.BOOKMARK + " = ?", // selection
+				new String[] { "0" }, // selectionArgs
+				Browser.BookmarkColumns.DATE // sortOrder
+				);
+		adapter.changeCursor(cursor);
+		// ベースクラスにCursorのライフサイクルを管理させる
+		startManagingCursor(cursor);
+	}
+
 	/**
 	 * すべて選択解除
 	 */
@@ -220,19 +265,19 @@ public class HistoryCleanerActivity extends Activity {
 	 * 履歴の削除
 	 */
 	private void delete() {
-		Cursor c = adapter.getCursor();
-		int uindex = c.getColumnIndex(Browser.BookmarkColumns.URL);
+		int uindex = cursor.getColumnIndex(Browser.BookmarkColumns.URL);
 		SparseBooleanArray array = listView.getCheckedItemPositions();
 
 		for (int i = 0; i < array.size(); i++) {
 			if (array.valueAt(i)) {
-				c.moveToPosition(array.keyAt(i));
+				cursor.moveToPosition(array.keyAt(i));
 				Browser.deleteFromHistory(getContentResolver(),
-						c.getString(uindex));
+						cursor.getString(uindex));
 			}
 		}
-		// 選択状態をリセット
 		allUnCheck();
+		// 再取得
+		getHistory();
 	}
 }
 // EOF
