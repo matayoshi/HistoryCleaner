@@ -12,4 +12,9 @@
 		android:title="@string/all_uncheck_label"
 		android:icon="@android:drawable/checkbox_off_background"
 		/>
+	<item
+		android:id="@+id/main_menu_sort"
+		android:title="@string/sort_label"
+		android:icon="@android:drawable/ic_menu_sort_alphabetically"
+		/>
 </menu>

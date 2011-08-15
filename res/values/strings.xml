@@ -10,8 +10,23 @@
 	<string name="all_uncheck_label">選択解除</string>
 	<string name="cancel">キャンセル</string>
 	<string name="not_checked">選択されていません</string>
+
 	<string name="checked_items_label">選択済み</string>
 	<string name="all_items_label">全</string>
 	<string name="unit_label">件</string>
 	<string name="of_label">中</string>
+
+	<string name="sort_label">並べ替え</string>
+<!--
+	<string name="id_asc">ID</string>
+	<string name="id_desc">ID(降順)</string>
+-->
+	<string name="title_asc">タイトル</string>
+	<string name="title_desc">タイトル(降順)</string>
+	<string name="url_asc">URL</string>
+	<string name="url_desc">URL(降順)</string>
+	<string name="date_asc">最終閲覧日</string>
+	<string name="date_desc">最終閲覧日(降順)</string>
+	<string name="visits_asc">表示回数</string>
+	<string name="visits_desc">表示回数(降順)</string>
 </resources>

@@ -36,6 +36,8 @@ import java.util.Set;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.Browser;
@@ -54,6 +56,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/*
+ * TODO: favicon の表示
+ * TODO: Title がない履歴の対処(Title == URL な場合に Title を省略する)
+ * TODO: スクロールしやすくする
+ */
 /**
  * メイン Activity
  * 
@@ -67,6 +74,16 @@ public class HistoryCleanerActivity extends Activity {
 	private TextView allItems = null;
 	private Cursor cursor = null;
 	private int checkedCount = 0;
+
+	private int sortOrder = 3;
+	private final String SORT_ORDER = "Sort_Order";
+	private final String[] SORT_PARAM = { Browser.BookmarkColumns.TITLE,
+			Browser.BookmarkColumns.TITLE + " DESC",
+			Browser.BookmarkColumns.URL, Browser.BookmarkColumns.URL + " DESC",
+			Browser.BookmarkColumns.DATE,
+			Browser.BookmarkColumns.DATE + " DESC",
+			Browser.BookmarkColumns.VISITS,
+			Browser.BookmarkColumns.VISITS + " DESC", };
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -91,6 +108,9 @@ public class HistoryCleanerActivity extends Activity {
 
 		checkedItems = (TextView) findViewById(R.id.checked_items);
 		allItems = (TextView) findViewById(R.id.all_items);
+
+		// 設定の読み込み
+		load_option();
 	}
 
 	/**
@@ -129,6 +149,8 @@ public class HistoryCleanerActivity extends Activity {
 		case R.id.main_menu_all_uncheck: // すべて選択解除
 			allUnCheck();
 			break;
+		case R.id.main_menu_sort: // 並べ替え
+			showSortDialog();
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -259,7 +281,7 @@ public class HistoryCleanerActivity extends Activity {
 				projection, // カラム
 				Browser.BookmarkColumns.BOOKMARK + " = ?", // selection
 				new String[] { "0" }, // selectionArgs
-				Browser.BookmarkColumns.DATE // sortOrder
+				SORT_PARAM[sortOrder] // sortOrder
 				);
 		adapter.changeCursor(cursor);
 		// ベースクラスにCursorのライフサイクルを管理させる
@@ -324,6 +346,48 @@ public class HistoryCleanerActivity extends Activity {
 		} else if (!deleteButton.isEnabled()) {
 			deleteButton.setEnabled(true);
 		}
+	}
+
+	/**
+	 * ソートオプションダイアログを表示します。
+	 */
+	private void showSortDialog() {
+		AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+		dialog.setTitle(R.string.sort_label);
+		dialog.setSingleChoiceItems(R.array.sort, sortOrder,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						sortOrder = which;
+						getHistory();
+						// 設定の保存
+						save_option();
+					}
+				});
+		dialog.create().show();
+	}
+
+	/**
+	 * 設定を読み込みます。
+	 */
+	private void load_option() {
+		SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+		int tmp = preferences.getInt(SORT_ORDER, sortOrder);
+		if (0 <= tmp && tmp < SORT_PARAM.length) {
+			sortOrder = tmp;
+		}
+	}
+
+	/**
+	 * 設定を保存します。
+	 */
+	private void save_option() {
+		SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+		Editor editor = preferences.edit();
+		editor.putInt(SORT_ORDER, sortOrder);
+		// 設定の保存
+		editor.commit();
 	}
 }
 // EOF

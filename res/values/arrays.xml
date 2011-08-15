@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="sort">
+<!--
+		<item>@string/id_asc</item>
+		<item>@string/id_desc</item>
+-->
+		<item>@string/title_asc</item>
+		<item>@string/title_desc</item>
+		<item>@string/url_asc</item>
+		<item>@string/url_desc</item>
+		<item>@string/date_asc</item>
+		<item>@string/date_desc</item>
+		<item>@string/visits_asc</item>
+		<item>@string/visits_desc</item>
+	</string-array>
+</resources>

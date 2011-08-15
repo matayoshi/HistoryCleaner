@@ -2,8 +2,8 @@
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="horizontal"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
 	>
 	<LinearLayout
 		android:orientation="vertical"
@@ -13,14 +13,14 @@
 		>
 		<TextView
 			android:id="@+id/title"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="top"
 			android:textAppearance="@android:style/TextAppearance.Medium"
 			/>
 		<TextView
 			android:id="@+id/url"
-			android:layout_width="fill_parent"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="top"
 			android:textAppearance="@android:style/TextAppearance.Small"
@@ -29,7 +29,7 @@
 	<TextView
 		android:id="@+id/view_count"
 		android:layout_width="0dp"
-		android:layout_height="fill_parent"
+		android:layout_height="match_parent"
 		android:layout_weight="0.15"
 		android:gravity="center"
 		android:textAppearance="@android:style/TextAppearance.Small"
@@ -37,11 +37,10 @@
 	<CheckBox 
 		android:id="@+id/del_check"
 		android:layout_width="0dp"
-		android:layout_height="fill_parent"
+		android:layout_height="match_parent"
 		android:layout_weight="0.15"
 		android:gravity="center"
 		android:focusable="false"
 		android:clickable="false"
-
 		/>
 </LinearLayout>
