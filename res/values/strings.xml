@@ -6,8 +6,12 @@
 	<string name="view_count">回数</string>
 	<string name="delete">削除</string>
 	<string name="list_empty">履歴がありません</string>
-	<string name="all_check_string">すべて選択</string>
-	<string name="all_uncheck_string">選択解除</string>
+	<string name="all_check_label">すべて選択</string>
+	<string name="all_uncheck_label">選択解除</string>
 	<string name="cancel">キャンセル</string>
 	<string name="not_checked">選択されていません</string>
+	<string name="checked_items_label">選択済み</string>
+	<string name="all_items_label">全</string>
+	<string name="unit_label">件</string>
+	<string name="of_label">中</string>
 </resources>

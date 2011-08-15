@@ -51,6 +51,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -60,8 +61,12 @@ import android.widget.Toast;
  */
 public class HistoryCleanerActivity extends Activity {
 	private CustomCursorAdapter adapter = null;
-	ListView listView = null;
-	Cursor cursor = null;
+	private ListView listView = null;
+	private Button deleteButton = null;
+	private TextView checkedItems = null;
+	private TextView allItems = null;
+	private Cursor cursor = null;
+	private int checkedCount = 0;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -81,8 +86,11 @@ public class HistoryCleanerActivity extends Activity {
 		listView.setAdapter(adapter);
 
 		// ボタンのクリックイベントを捕捉する
-		Button button = (Button) findViewById(R.id.del_button);
-		button.setOnClickListener(clickListener);
+		deleteButton = (Button) findViewById(R.id.del_button);
+		deleteButton.setOnClickListener(clickListener);
+
+		checkedItems = (TextView) findViewById(R.id.checked_items);
+		allItems = (TextView) findViewById(R.id.all_items);
 	}
 
 	/**
@@ -93,6 +101,9 @@ public class HistoryCleanerActivity extends Activity {
 		super.onStart();
 
 		getHistory();
+
+		checkedCount = 0;
+		dispCheckedCount();
 	}
 
 	/**
@@ -130,7 +141,16 @@ public class HistoryCleanerActivity extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			// 選択状態を切り替える
-			((CheckBox) view.findViewById(R.id.del_check)).toggle();
+			CheckBox checkBox = (CheckBox) view.findViewById(R.id.del_check);
+			checkBox.toggle();
+
+			// 選択件数を更新
+			if (checkBox.isChecked()) {
+				checkedCount++;
+			} else {
+				checkedCount--;
+			}
+			dispCheckedCount();
 		}
 	};
 
@@ -211,6 +231,11 @@ public class HistoryCleanerActivity extends Activity {
 				int index = it.next();
 				listView.setItemChecked(index, true);
 			}
+
+			// 選択件数を更新
+			checkedCount = set.size();
+			dispCheckedCount();
+
 			return true;
 		}
 	};
@@ -239,30 +264,37 @@ public class HistoryCleanerActivity extends Activity {
 		adapter.changeCursor(cursor);
 		// ベースクラスにCursorのライフサイクルを管理させる
 		startManagingCursor(cursor);
+
+		// 全件数を表示
+		allItems.setText(String.format("%,d", cursor.getCount()));
 	}
 
 	/**
-	 * すべて選択解除
+	 * すべての項目を選択解除します。
 	 */
 	private void allUnCheck() {
 		int num = listView.getCount();
 		for (int i = 0; i < num; i++) {
 			listView.setItemChecked(i, false);
 		}
+		checkedCount = 0;
+		dispCheckedCount();
 	}
 
 	/**
-	 * すべて選択
+	 * すべての項目を選択します。
 	 */
 	private void allCheck() {
 		int num = listView.getCount();
 		for (int i = 0; i < num; i++) {
 			listView.setItemChecked(i, true);
 		}
+		checkedCount = num;
+		dispCheckedCount();
 	}
 
 	/**
-	 * 履歴の削除
+	 * 履歴を削除します。
 	 */
 	private void delete() {
 		int uindex = cursor.getColumnIndex(Browser.BookmarkColumns.URL);
@@ -278,6 +310,20 @@ public class HistoryCleanerActivity extends Activity {
 		allUnCheck();
 		// 再取得
 		getHistory();
+	}
+
+	/**
+	 * 選択件数を表示します。
+	 */
+	private void dispCheckedCount() {
+		checkedItems.setText(String.format("%,d", checkedCount));
+
+		// 選択済みの件数が 0 件なら削除ボタンを無効化
+		if (checkedCount == 0) {
+			deleteButton.setEnabled(false);
+		} else if (!deleteButton.isEnabled()) {
+			deleteButton.setEnabled(true);
+		}
 	}
 }
 // EOF

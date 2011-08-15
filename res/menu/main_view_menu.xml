@@ -4,12 +4,12 @@
 	>
 	<item
 		android:id="@+id/main_menu_all_check"
-		android:title="@string/all_check_string"
+		android:title="@string/all_check_label"
 		android:icon="@android:drawable/checkbox_on_background"
 		/>
 	<item
 		android:id="@+id/main_menu_all_uncheck"
-		android:title="@string/all_uncheck_string"
+		android:title="@string/all_uncheck_label"
 		android:icon="@android:drawable/checkbox_off_background"
 		/>
 </menu>
