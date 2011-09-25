@@ -66,11 +66,14 @@ class CustomCursorAdapter extends SimpleCursorAdapter {
 		Cursor c = (Cursor) getItem(position);
 		c.moveToPosition(position);
 
-		// データの取得
-		holder.title.setText(c.getString(c
-				.getColumnIndex(Browser.BookmarkColumns.TITLE)));
-		holder.url.setText(c.getString(c
-				.getColumnIndex(Browser.BookmarkColumns.URL)));
+		// データの取得と設定 タイトルとURLが同じなら、タイトルに(no title)と設定する
+		String title = c.getString(c
+				.getColumnIndex(Browser.BookmarkColumns.TITLE));
+		String url = c.getString(c
+				.getColumnIndex(Browser.BookmarkColumns.URL));
+
+		holder.title.setText(title.equals(url) ? "(no title)" : title);
+		holder.url.setText(url);
 		holder.viewCount.setText(c.getString(c
 				.getColumnIndex(Browser.BookmarkColumns.VISITS)));
 		return view;
