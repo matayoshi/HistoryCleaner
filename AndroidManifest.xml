@@ -2,8 +2,8 @@
 <manifest
      xmlns:android="http://schemas.android.com/apk/res/android"
      package="nmtysh.android.app.historycleaner"
-     android:versionCode="3"
-     android:versionName="1.1.1">
+     android:versionCode="4"
+     android:versionName="1.1.2">
     <uses-sdk android:minSdkVersion="8" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"></uses-permission>
     <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"></uses-permission>

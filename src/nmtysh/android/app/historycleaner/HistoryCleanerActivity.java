@@ -288,7 +288,7 @@ public class HistoryCleanerActivity extends Activity {
 		startManagingCursor(cursor);
 
 		// 全件数を表示
-		allItems.setText(String.format("%,d", cursor.getCount()));
+		allItems.setText(getString(R.string.all_items_label, cursor.getCount()));
 	}
 
 	/**
@@ -338,7 +338,7 @@ public class HistoryCleanerActivity extends Activity {
 	 * 選択件数を表示します。
 	 */
 	private void dispCheckedCount() {
-		checkedItems.setText(String.format("%,d", checkedCount));
+		checkedItems.setText(getString(R.string.checked_items_label, checkedCount));
 
 		// 選択済みの件数が 0 件なら削除ボタンを無効化
 		if (checkedCount == 0) {

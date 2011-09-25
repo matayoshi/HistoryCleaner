@@ -12,30 +12,10 @@
 		android:gravity="right"
 		>
 		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
-			android:text="@string/all_items_label"
-			android:textAppearance="@android:style/TextAppearance.Small"
-			/>
-		<TextView
 			android:id="@+id/all_items"
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
-			android:layout_marginLeft="5dp"
-			android:layout_marginRight="5dp"
-			android:text="0"
-			android:textAppearance="@android:style/TextAppearance.Small"
-			/>
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
-			android:text="@string/unit_label"
-			android:textAppearance="@android:style/TextAppearance.Small"
-			/>
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
-			android:text="@string/of_label"
+			android:text="@string/all_items_default_label"
 			android:textAppearance="@android:style/TextAppearance.Small"
 			/>
 		<TextView
@@ -43,20 +23,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
 			android:layout_marginLeft="5dp"
-			android:layout_marginRight="5dp"
-			android:text="0"
-			android:textAppearance="@android:style/TextAppearance.Small"
-			/>
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
-			android:text="@string/unit_label"
-			android:textAppearance="@android:style/TextAppearance.Small"
-			/>
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
-			android:text="@string/checked_items_label"
+			android:text="@string/checked_items_default_label"
 			android:textAppearance="@android:style/TextAppearance.Small"
 			/>
 	</LinearLayout>
