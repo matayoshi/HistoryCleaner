@@ -49,7 +49,7 @@ public class CustomView extends LinearLayout implements Checkable {
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(
 				R.layout.list, this, false);
 
-		checkBox = (CheckBox) view.findViewById(R.id.del_check);
+		checkBox = (CheckBox) view.findViewById(R.id.delete_checkbox);
 
 		addView(view);
 	}

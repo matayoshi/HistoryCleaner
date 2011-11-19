@@ -35,7 +35,7 @@
 		android:textAppearance="@android:style/TextAppearance.Small"
 		/>
 	<CheckBox 
-		android:id="@+id/del_check"
+		android:id="@+id/delete_checkbox"
 		android:layout_width="0dp"
 		android:layout_height="match_parent"
 		android:layout_weight="0.15"

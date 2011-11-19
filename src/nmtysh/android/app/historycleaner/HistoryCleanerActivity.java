@@ -103,7 +103,7 @@ public class HistoryCleanerActivity extends Activity {
 		listView.setAdapter(adapter);
 
 		// ボタンのクリックイベントを捕捉する
-		deleteButton = (Button) findViewById(R.id.del_button);
+		deleteButton = (Button) findViewById(R.id.delete_button);
 		deleteButton.setOnClickListener(clickListener);
 
 		checkedItems = (TextView) findViewById(R.id.checked_items);
@@ -143,16 +143,16 @@ public class HistoryCleanerActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.main_menu_all_check: // すべて選択
-			allCheck();
-			break;
-		case R.id.main_menu_all_uncheck: // すべて選択解除
-			allUnCheck();
-			break;
-		case R.id.main_menu_sort: // 並べ替え
-			showSortDialog();
-		default:
-			return super.onOptionsItemSelected(item);
+			case R.id.main_menu_all_check: // すべて選択
+				allCheck();
+				break;
+			case R.id.main_menu_all_uncheck: // すべて選択解除
+				allUnCheck();
+				break;
+			case R.id.main_menu_sort: // 並べ替え
+				showSortDialog();
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 		return true;
 	}
@@ -163,7 +163,8 @@ public class HistoryCleanerActivity extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			// 選択状態を切り替える
-			CheckBox checkBox = (CheckBox) view.findViewById(R.id.del_check);
+			CheckBox checkBox = (CheckBox) view
+					.findViewById(R.id.delete_checkbox);
 			checkBox.toggle();
 
 			// 選択件数を更新
@@ -338,7 +339,8 @@ public class HistoryCleanerActivity extends Activity {
 	 * 選択件数を表示します。
 	 */
 	private void dispCheckedCount() {
-		checkedItems.setText(getString(R.string.checked_items_label, checkedCount));
+		checkedItems.setText(getString(R.string.checked_items_label,
+				checkedCount));
 
 		// 選択済みの件数が 0 件なら削除ボタンを無効化
 		if (checkedCount == 0) {
