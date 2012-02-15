@@ -27,12 +27,6 @@
 			android:textAppearance="@android:style/TextAppearance.Small"
 			/>
 	</LinearLayout>
-	<LinearLayout
-		android:orientation="vertical"
-		android:layout_width="match_parent"
-		android:layout_height="0dip"
-		android:layout_weight="1"
-		>
 		<LinearLayout 
 			android:orientation="horizontal"
 			android:layout_width="match_parent"
@@ -63,6 +57,12 @@
 				android:gravity="center"
 				/>
 		</LinearLayout>
+	<LinearLayout
+		android:orientation="vertical"
+		android:layout_width="match_parent"
+		android:layout_height="0dip"
+		android:layout_weight="1"
+		>
 		<ListView
 			android:id="@android:id/list"
 			android:layout_width="match_parent"

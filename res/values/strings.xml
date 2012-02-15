@@ -5,11 +5,14 @@
 	<string name="url">URL</string>
 	<string name="view_count">回数</string>
 	<string name="delete">削除</string>
-	<string name="list_empty">履歴がありません</string>
+	<string name="list_empty">履歴はありません</string>
 	<string name="all_check_label">すべて選択</string>
 	<string name="all_uncheck_label">選択解除</string>
 	<string name="cancel">キャンセル</string>
 	<string name="not_checked">選択されていません</string>
+	<string name="now_loading">読み込み中…</string>
+	<string name="please_wait">しばらくお待ち下さい…</string>
+	<string name="confirm_delete">以下の %1$,d 件を削除しますか?</string>
 
 	<string name="checked_items_label">%1$,d 件選択済み</string>
 	<string name="all_items_label">全 %1$,d 件中</string>

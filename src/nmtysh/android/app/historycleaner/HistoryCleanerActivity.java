@@ -32,13 +32,17 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.util.SparseBooleanArray;
@@ -51,14 +55,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 /*
  * TODO: favicon の表示
- * TODO: Title がない履歴の対処(Title == URL な場合に Title を省略する)
  * TODO: スクロールしやすくする
  */
 /**
@@ -66,7 +68,7 @@ import android.widget.Toast;
  * 
  * @author n.matayoshi
  */
-public class HistoryCleanerActivity extends Activity {
+public class HistoryCleanerActivity extends ListActivity {
 	private CustomCursorAdapter adapter = null;
 	private ListView listView = null;
 	private Button deleteButton = null;
@@ -163,12 +165,10 @@ public class HistoryCleanerActivity extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			// 選択状態を切り替える
-			CheckBox checkBox = (CheckBox) view
-					.findViewById(R.id.delete_checkbox);
-			checkBox.toggle();
+			((CustomView) view).toggle();
 
 			// 選択件数を更新
-			if (checkBox.isChecked()) {
+			if (((CustomView) view).isChecked()) {
 				checkedCount++;
 			} else {
 				checkedCount--;
@@ -201,7 +201,7 @@ public class HistoryCleanerActivity extends Activity {
 
 			AlertDialog.Builder dialog = new AlertDialog.Builder(
 					HistoryCleanerActivity.this);
-			dialog.setTitle("以下の" + list.size() + "件を削除しますか?");
+			dialog.setTitle(getString(R.string.confirm_delete, list.size()));
 			dialog.setItems((String[]) list.toArray(new String[0]), null);
 			dialog.setPositiveButton(R.string.delete,
 					new DialogInterface.OnClickListener() {
@@ -267,29 +267,84 @@ public class HistoryCleanerActivity extends Activity {
 	 * 履歴を取得します。
 	 */
 	private void getHistory() {
-		// 古いカーソルがある場合は明示的に閉じる。
-		if (cursor != null) {
-			stopManagingCursor(cursor);
-			cursor.close();
-			cursor = null;
-		}
+		new AsyncTask<Void, Void, Cursor>() {
+			Timer timer = new Timer();
+			ProgressDialog progress = new ProgressDialog(
+					HistoryCleanerActivity.this);
 
-		// 取得するDBのカラム指定
-		String[] projection = new String[] { Browser.BookmarkColumns.TITLE,
-				Browser.BookmarkColumns.URL, Browser.BookmarkColumns.VISITS, };
-		// ContentProviderから履歴情報を取得(ブックマーク登録されたものを除外する)
-		cursor = getContentResolver().query(Browser.BOOKMARKS_URI, // URI
-				projection, // カラム
-				Browser.BookmarkColumns.BOOKMARK + " = ?", // selection
-				new String[] { "0" }, // selectionArgs
-				SORT_PARAM[sortOrder] // sortOrder
-				);
-		adapter.changeCursor(cursor);
-		// ベースクラスにCursorのライフサイクルを管理させる
-		startManagingCursor(cursor);
+			// 実行準備。事前処理
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
 
-		// 全件数を表示
-		allItems.setText(getString(R.string.all_items_label, cursor.getCount()));
+				progress.setMessage(getString(R.string.now_loading));
+				progress.setCancelable(false);
+
+				// 一定時間(200ミリ秒)でデータ取得が完了しなかった場合に、
+				// プログレスダイアログを表示する
+				TimerTask progressTask = new TimerTask() {
+					@Override
+					public void run() {
+						// UIスレッドでダイアログを表示
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								if (progress != null) {
+									progress.show();
+								}
+							}
+						});
+					}
+				};
+				timer.schedule(progressTask, 200);
+			}
+
+			// バックグラウンドで実行する
+			@Override
+			protected Cursor doInBackground(Void... params) {
+				// 取得するDBのカラム指定
+				String[] projection = new String[] {
+						Browser.BookmarkColumns.TITLE,
+						Browser.BookmarkColumns.URL,
+						Browser.BookmarkColumns.VISITS, };
+				// ContentProviderから履歴情報を取得(ブックマーク登録されたものを除外する)
+				Cursor cursor = getContentResolver().query(
+						Browser.BOOKMARKS_URI, // URI
+						projection, // カラム
+						Browser.BookmarkColumns.BOOKMARK + " = ?", // selection
+						new String[] { "0" }, // selectionArgs
+						SORT_PARAM[sortOrder] // sortOrder
+						);
+				return cursor;
+			}
+
+			// 実行完了。後始末。
+			@Override
+			protected void onPostExecute(Cursor c) {
+				// タイマーをキャンセル
+				timer.cancel();
+				timer = null;
+				// プログレスダイアログをキャンセル
+				progress.cancel();
+				progress = null;
+
+				// 古いカーソルがある場合は明示的に閉じる。
+				if (cursor != null) {
+					stopManagingCursor(cursor);
+					cursor.close();
+					cursor = null;
+				}
+
+				cursor = c;
+				adapter.changeCursor(cursor);
+				// ベースクラスにCursorのライフサイクルを管理させる
+				startManagingCursor(cursor);
+
+				// 全件数を表示
+				allItems.setText(getString(R.string.all_items_label,
+						cursor.getCount()));
+			}
+		}.execute();
 	}
 
 	/**
@@ -320,19 +375,75 @@ public class HistoryCleanerActivity extends Activity {
 	 * 履歴を削除します。
 	 */
 	private void delete() {
-		int uindex = cursor.getColumnIndex(Browser.BookmarkColumns.URL);
-		SparseBooleanArray array = listView.getCheckedItemPositions();
+		new AsyncTask<SparseBooleanArray, String, Void>() {
+			Timer timer = new Timer();
+			ProgressDialog progress = new ProgressDialog(
+					HistoryCleanerActivity.this);
 
-		for (int i = 0; i < array.size(); i++) {
-			if (array.valueAt(i)) {
-				cursor.moveToPosition(array.keyAt(i));
-				Browser.deleteFromHistory(getContentResolver(),
-						cursor.getString(uindex));
+			// 実行準備。事前処理
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+
+				progress.setMessage(getString(R.string.please_wait));
+				progress.setCancelable(false);
+
+				// 一定時間(200ミリ秒)でデータ取得が完了しなかった場合に、
+				// プログレスダイアログを表示する
+				TimerTask progressTask = new TimerTask() {
+					@Override
+					public void run() {
+						// UIスレッドでダイアログを表示
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								if (progress != null) {
+									progress.show();
+								}
+							}
+						});
+					}
+				};
+				timer.schedule(progressTask, 200);
 			}
-		}
-		allUnCheck();
-		// 再取得
-		getHistory();
+
+			// バックグラウンドで実行する
+			@Override
+			protected Void doInBackground(SparseBooleanArray... params) {
+				SparseBooleanArray array = params[0];
+				int uindex = cursor.getColumnIndex(Browser.BookmarkColumns.URL);
+
+				// 履歴を削除
+				for (int i = 0; i < array.size(); i++) {
+					if (array.valueAt(i)) {
+						cursor.moveToPosition(array.keyAt(i));
+						publishProgress(cursor.getString(uindex));
+					}
+				}
+				return null;
+			}
+
+			@Override
+			protected void onProgressUpdate(String... values) {
+				super.onProgressUpdate(values);
+				Browser.deleteFromHistory(getContentResolver(), values[0]);
+			}
+
+			// 実行完了。後始末。
+			@Override
+			protected void onPostExecute(Void param) {
+				// タイマーをキャンセル
+				timer.cancel();
+				timer = null;
+				// プログレスダイアログをキャンセル
+				progress.cancel();
+				progress = null;
+
+				allUnCheck();
+				// 再取得
+				getHistory();
+			}
+		}.execute(listView.getCheckedItemPositions());
 	}
 
 	/**
